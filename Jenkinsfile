@@ -15,9 +15,16 @@ pipeline {
             }
         }
 
-        stage('Verify Project') {
+        stage('Build Android APK') {
             steps {
-                sh 'ls -la'
+                sh 'chmod +x gradlew'
+                sh './gradlew assembleDebug'
+            }
+        }
+
+        stage('Verify APK') {
+            steps {
+                sh 'ls -lh app/build/outputs/apk/debug/'
             }
         }
     }
