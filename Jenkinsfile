@@ -41,5 +41,15 @@ pipeline {
                 sh 'ls -lh app/build/outputs/apk/debug/'
             }
         }
+
+        stage('Upload APK to S3') {
+            steps {
+                sh '''
+                    aws s3 cp \
+                    app/build/outputs/apk/debug/app-debug.apk \
+                    s3://evida-cicd-artifacts-2026/app-debug.apk
+                '''
+            }
+        }
     }
 }
