@@ -29,22 +29,26 @@ pipeline {
             }
         }
 
-        stage('Run Unit Tests') {
-            steps {
-                sh './gradlew testDebugUnitTest --no--daemon'
-            }
-        }
-
-         stage('Run Android Lint') {
-            steps {
-                sh './gradlew lintDebug --no--daemon'
-            }
-        }
-
-        
-        stage('Build Android APK') {
+        stage('Prepare Gradle') {
             steps {
                 sh 'chmod +x gradlew'
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                sh './gradlew testDebugUnitTest --no-daemon'
+            }
+        }
+
+        stage('Run Android Lint') {
+            steps {
+                sh './gradlew lintDebug --no-daemon'
+            }
+        }
+
+        stage('Build Android APK') {
+            steps {
                 sh './gradlew assembleDebug --no-daemon'
             }
         }
