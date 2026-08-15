@@ -1,546 +1,495 @@
-# 🚀 EVIDA --- Android CI/CD Pipeline
-
-```{=html}
-<p align="center">
+# 🛡️ EVIDA — Forensic Evidence Capture Application
+## 🛡️ Capture. Protect. Verify. Preserve.
+A forensic-grade Android application designed to capture, secure, manage, and export digital evidence with cryptographic integrity and chain-of-custody metadata.
+---
+## 📖 About EVIDA
+**EVIDA (Evidence Capture Application)** is a forensic-grade Android mobile application for capturing and managing digital evidence.
+The central problem EVIDA addresses is simple:
+> **A normal screenshot can be edited, fabricated, or tampered with, making it difficult to establish its integrity and provenance.**
+EVIDA turns ordinary screenshot capture into a controlled forensic evidence workflow. At the point of capture, the application records evidence integrity information and binds the captured content to forensic metadata such as **GPS coordinates, NTP-based timestamps, device identity, and application/source verification**.
+The evidence is protected using multiple cryptographic layers, stored with associated metadata, and can be exported as a **forensic bundle containing encrypted evidence and a signed PDF report**.
+This project is intended for use cases involving **cybercrime, online harassment, fraud, digital defamation, legal documentation, and digital-forensics workflows**.
+The project's domain, problem statement, architecture, and technical design are documented in the EVIDA project report.
+---
+# 🎯 The Problem
+Digital evidence such as screenshots and screen recordings can be easily modified after capture.
+Traditional screenshot tools generally do not provide:
+- ❌ Cryptographic integrity verification
+- ❌ Provenance information
+- ❌ Hardware-backed key protection
+- ❌ A forensic chain of custody
+- ❌ Trusted timestamps
+- ❌ Evidence-oriented export packages
+EVIDA was designed to address these gaps by binding each capture to **hardware-backed security, GPS coordinates, NTP timestamping, and device identity**. The project report identifies the lack of real-time forensic capture and cryptographic chain-of-custody mechanisms as key gaps in existing approaches.
+---
+# 💡 What EVIDA Actually Does
+At a high level, EVIDA follows this workflow:
+```text
+ ┌──────────────────────┐
+ │ USER │
+ │ Captures digital │
+ │ evidence │
+ └──────────┬───────────┘
+ │
+ ▼
+ ┌──────────────────────┐
+ │ SCREEN CAPTURE │
+ │ Screenshot acquired │
+ └──────────┬───────────┘
+ │
+ ▼
+ ┌──────────────────────┐
+ │ SHA-256 HASH │
+ │ Integrity fingerprint│
+ └──────────┬───────────┘
+ │
+ ▼
+ ┌──────────────────────────────────┐
+ │ FORENSIC METADATA │
+ │ GPS • NTP Time • Device Identity│
+ │ Source/App information │
+ └────────────────┬─────────────────┘
+ │
+ ▼
+ ┌──────────────────────┐
+ │ AES-256 GCM │
+ │ Encrypt evidence │
+ └──────────┬───────────┘
+ │
+ ▼
+ ┌──────────────────────┐
+ │ RSA-2048 OAEP │
+ │ Wrap AES session key │
+ └──────────┬───────────┘
+ │
+ ▼
+ ┌──────────────────────┐
+ │ ECDSA P-256 │
+ │ Sign metadata/hash │
+ └──────────┬───────────┘
+ │
+ ▼
+ ┌──────────────────────┐
+ │ FORENSIC EVIDENCE │
+ │ BUNDLE │
+ │ Encrypted evidence │
+ │ + signed PDF report │
+ └──────────────────────┘
 ```
-`<strong>`{=html}Automated Build • Test • Lint • Artifact
-Delivery`</strong>`{=html}`<br>`{=html} A Jenkins-based CI/CD pipeline
-for the EVIDA Android application, with AWS S3 used for APK artifact
-storage.
-```{=html}
-</p>
+The documented encryption flow starts by hashing the screenshot with SHA-256, encrypting it with an ephemeral AES-256 session key, wrapping that key with the forensic authority's RSA-2048 public key, and signing metadata/hash information through Android KeyStore-backed hardware security.
+---
+# 🔐 Security Model
+EVIDA uses multiple security layers rather than relying on a single encryption mechanism.
+| Security Layer | Technology | Purpose |
+|---|---|---|
+| 🔏 Evidence Encryption | **AES-256 GCM** | Encrypts the captured evidence. |
+| 🔑 Key Wrapping | **RSA-2048 OAEP** | Protects the AES session key using the forensic authority's public key. |
+| ✍️ Digital Signature | **ECDSA P-256** | Provides cryptographic signing of evidence metadata/hash information. |
+| #️⃣ Integrity Hash | **SHA-256** | Creates an integrity fingerprint for the captured evidence. |
+| 🛡️ Hardware Security | **Android KeyStore / TEE / StrongBox** | Generates and protects sensitive keys using hardware-backed security. |
+| 📍 Location | **GPS** | Records location information associated with the capture. |
+| 🕐 Trusted Time | **NTP** | Provides atomic/tamper-resistant timestamping for capture events. |
+| 🔐 User Authentication | **Biometric / PIN** | Controls access to the protected evidence environment. |
+| 🗄️ Local Metadata | **Room** | Stores encrypted/local evidence metadata. |
+These technologies and their intended roles are specified in the project's technical architecture.
+---
+# ⛓️ Forensic Chain of Custody
+A major goal of EVIDA is to maintain a traceable relationship between the original capture and the exported evidence.
+```mermaid
+flowchart TD
+ A["📱 Evidence Captured"] --> B["#️⃣ SHA-256 Hash"]
+ B --> C["📍 Collect Forensic Metadata"]
+ C --> D["🔐 AES-256 GCM Encryption"]
+ D --> E["🔑 RSA-2048 Key Wrapping"]
+ E --> F["✍️ ECDSA Signature"]
+ F --> G["🛡️ Hardware-backed KeyStore"]
+ G --> H["📦 Forensic Bundle"]
+ H --> I["⚖️ Authority / Legal Review"]
 ```
-```{=html}
-<p align="center">
+The project identifies GPS, NTP timestamp, device identity, source verification, encryption, signing, and export as parts of its forensic chain-of-custody approach.
+---
+# 🔄 Encryption & Decryption
+## Encryption
+The documented encryption process consists of four main steps:
+### 1. Capture + Hash
+The screenshot is captured and immediately hashed using **SHA-256**.
+```text
+Screenshot
+ ↓
+SHA-256
+ ↓
+Integrity Anchor
 ```
-`<img src="https://img.shields.io/badge/Platform-Android-green?style=for-the-badge&logo=android" alt="Android">`{=html}
-`<img src="https://img.shields.io/badge/CI%2FCD-Jenkins-red?style=for-the-badge&logo=jenkins" alt="Jenkins">`{=html}
-`<img src="https://img.shields.io/badge/Source-GitHub-black?style=for-the-badge&logo=github" alt="GitHub">`{=html}
-`<img src="https://img.shields.io/badge/Cloud-AWS-orange?style=for-the-badge&logo=amazonaws" alt="AWS">`{=html}
-`<img src="https://img.shields.io/badge/Artifact-Amazon%20S3-blue?style=for-the-badge&logo=amazons3" alt="Amazon S3">`{=html}
-`<img src="https://img.shields.io/badge/IaC-Terraform-purple?style=for-the-badge&logo=terraform" alt="Terraform">`{=html}
-```{=html}
-</p>
+### 2. Digital Enveloping
+An ephemeral **AES-256** session key encrypts the screenshot.
+```text
+Screenshot + AES-256 Session Key
+ ↓
+ Encrypted Evidence
 ```
-
-------------------------------------------------------------------------
-
-## 📌 Overview
-
-**EVIDA** uses a Jenkins CI/CD pipeline to automate the process of
-taking Android source code from GitHub through validation, testing,
-static analysis, APK generation, and artifact delivery.
-
-The pipeline is designed so that a failure in an important quality stage
-prevents the later delivery stages from running.
-
-### ✨ What the pipeline does
-
-``` text
-Developer
-    │
-    ▼
-GitHub Repository
-    │
-    ▼
-Jenkins
-    │
-    ├── Verify Java
-    ├── Verify Android SDK
-    ├── Prepare Gradle
-    ├── Run Unit Tests
-    ├── Run Android Lint
-    ├── Build Android APK
-    ├── Verify APK
-    ├── Upload APK → Amazon S3
-    ├── Generate Presigned Download URL
-    └── Cleanup Jenkins Workspace
+### 3. Key Wrapping
+The AES session key is wrapped using the forensic authority's **RSA-2048 public key**.
+```text
+AES Session Key
+ ↓
+RSA-2048 OAEP
+ ↓
+Wrapped AES Key
 ```
-
-------------------------------------------------------------------------
-
-# 🏗️ CI/CD Architecture
-
-``` mermaid
+### 4. Hardware-backed Signing
+Android KeyStore-backed security signs the metadata and SHA-256 hash to establish the cryptographic chain of custody.
+These four encryption steps are described in the project's encryption/decryption process documentation.
+---
+## 🔓 Decryption
+EVIDA's documented decryption workflow is:
+```text
+Biometric / PIN Authentication
+ ↓
+ Unlock Hardware KeyStore
+ ↓
+ Fetch Wrapped AES Key
+ ↓
+ Unwrap AES Session Key
+ ↓
+ Recalculate Evidence Hash
+ ↓
+ Verify Integrity
+ ↓
+ AES-256 GCM Decryption
+ ↓
+ View Decrypted Evidence
+```
+The system re-hashes the evidence and verifies its integrity before decrypting it for viewing.
+---
+# 📱 Application Workflow
+EVIDA is more than a background encryption utility. It provides a complete user-facing workflow.
+### 1️⃣ Welcome / Initialization
+The application starts with the EVIDA secure forensic environment.
+### 2️⃣ System Readiness
+Before evidence capture, the application verifies required forensic modules such as:
+- GPS coordinates
+- Widget overlay
+- Usage telemetry
+- Screen capture
+### 3️⃣ Secure PIN Setup
+The user creates a six-digit PIN used to protect the forensic environment.
+### 4️⃣ Forensic Dashboard
+The home screen provides the current security/core status and monitoring information.
+### 5️⃣ Evidence Capture
+The user captures digital evidence from the device.
+### 6️⃣ Evidence Protection
+The capture is hashed, encrypted, signed, and associated with forensic metadata.
+### 7️⃣ Evidence List
+Captured evidence can be viewed and managed through the evidence section.
+### 8️⃣ Decryption & Verification
+Authorized access allows the evidence to be decrypted after authentication and integrity verification.
+### 9️⃣ Forensic Report
+The evidence can be exported together with a signed PDF report for documentation and further forensic/legal handling.
+The project report includes application screenshots showing the Welcome Page, Permissions/System Readiness, PIN Setup, Home Screen, Evidence List, and Decrypted Evidence with report.
+---
+# 📦 Forensic Bundle
+EVIDA produces a forensic export package containing:
+```text
+Forensic Bundle
+│
+├── 🔐 Encrypted Evidence
+│
+└── 📄 Signed PDF Report
+ │
+ ├── Evidence metadata
+ ├── Integrity information
+ └── Verification information
+```
+The intended workflow is:
+```text
+User Capture
+ ↓
+Encrypt + Sign
+ ↓
+Export Forensic Bundle
+ ↓
+Forensic Authority / Police Lab
+ ↓
+Decryption + Analysis
+ ↓
+Legal Documentation
+```
+The stakeholder map in the project report describes this flow from user capture through encryption/signing, forensic export, authority decryption, and legal use.
+---
+# 👥 Intended Users
+EVIDA is designed around several stakeholders:
+| Stakeholder | How EVIDA Helps |
+|---|---|
+| 👤 **End Users / Victims** | Capture, securely store, and export digital evidence. |
+| 👮 **Forensic Authorities / Police Labs** | Receive encrypted forensic bundles for decryption and analysis. |
+| ⚖️ **Legal Professionals** | Use signed PDF reports and hash verification as supporting documentation. |
+| 📱 **Android OS / Hardware** | Provides KeyStore-backed key generation, secure storage, and biometric authentication. |
+| 🕐 **NTP Server** | Provides trusted timestamp information for capture events. |
+These stakeholder roles are defined in the project's systems and stakeholder map.
+---
+# 🏗️ Technical Architecture
+```mermaid
+flowchart TB
+ U["👤 User"] --> UI["📱 Android AppKotlin + Jetpack Compose"]
+ UI --> CAP["📸 Evidence Capture"]
+ UI --> AUTH["🔐 PIN / Biometric Authentication"]
+ CAP --> META["📋 Forensic Metadata"]
+ META --> GPS["📍 GPS"]
+ META --> NTP["🕐 NTP Timestamp"]
+ META --> DEV["📱 Device Identity"]
+ META --> SRC["🔎 Source Verification"]
+ CAP --> HASH["#️⃣ SHA-256"]
+ CAP --> ENC["🔐 AES-256 GCM"]
+ ENC --> WRAP["🔑 RSA-2048 OAEP"]
+ HASH --> SIGN["✍️ ECDSA P-256"]
+ META --> SIGN
+ AUTH --> KS["🛡️ Android KeyStoreTEE / StrongBox"]
+ SIGN --> KS
+ WRAP --> KS
+ META --> DB["🗄️ Room Database"]
+ ENC --> BUNDLE["📦 Forensic Bundle"]
+ SIGN --> BUNDLE
+ DB --> BUNDLE
+ BUNDLE --> PDF["📄 Signed PDF Report"]
+```
+The technical architecture specifies Kotlin, Jetpack Compose/Material 3, Room, Kotlin Coroutines/Flow, Android KeyStore with TEE/StrongBox, and the project's cryptographic stack.
+---
+# 🧰 Technology Stack
+### 📱 Android
+- **Kotlin**
+- **Jetpack Compose**
+- **Material 3**
+- **Android KeyStore**
+- **TEE / StrongBox**
+- **Room Persistence Library**
+- **Kotlin Coroutines**
+- **Kotlin Flow**
+### 🔐 Cryptography
+- **AES-256 GCM**
+- **RSA-2048 OAEP**
+- **ECDSA P-256**
+- **SHA-256**
+### ☁️ Infrastructure & DevOps
+- **Jenkins**
+- **GitHub**
+- **AWS**
+- **Amazon S3**
+- **Terraform**
+- **Gradle**
+The project specifies Android API 24 as the minimum SDK and API 36 as the target SDK.
+---
+# 🚀 CI/CD Pipeline
+The Android application is supported by a Jenkins CI/CD pipeline that automates validation and artifact generation.
+```mermaid
 flowchart LR
-    A["👩‍💻 Developer<br/>Code Changes"] --> B["🐙 GitHub<br/>EVIDA Repository"]
-    B --> C["🔧 Jenkins<br/>CI/CD Server"]
-
-    C --> D["☕ Verify Java"]
-    D --> E["🤖 Verify Android SDK"]
-    E --> F["⚙️ Prepare Gradle"]
-    F --> G["🧪 Unit Tests"]
-    G --> H["🔎 Android Lint"]
-    H --> I["📦 Build Android APK"]
-    I --> J["✅ Verify APK"]
-    J --> K["☁️ Upload APK to S3"]
-    K --> L["🔗 Generate Presigned URL"]
-    L --> M["🧹 Workspace Cleanup"]
-
-    G -. "Failure → Stop" .-> X["❌ Pipeline Failed"]
-    H -. "Failure → Stop" .-> X
-    I -. "Failure → Stop" .-> X
-
-    M --> N["✅ Pipeline Complete"]
+ DEV["👩‍💻 Developer"] --> GH["🐙 GitHub"]
+ GH --> J["🔧 Jenkins"]
+ J --> JAVA["☕ Verify Java"]
+ JAVA --> SDK["🤖 Verify Android SDK"]
+ SDK --> GRADLE["⚙️ Prepare Gradle"]
+ GRADLE --> TEST["🧪 Unit Tests"]
+ TEST --> LINT["🔎 Android Lint"]
+ LINT --> BUILD["📦 Build APK"]
+ BUILD --> VERIFY["✅ Verify APK"]
+ VERIFY --> S3["☁️ Upload to S3"]
+ S3 --> URL["🔗 Generate Presigned URL"]
+ URL --> CLEAN["🧹 Cleanup"]
+ CLEAN --> SUCCESS["🎉 Pipeline Complete"]
+ TEST -. "Failure" .-> FAIL["❌ Stop"]
+ LINT -. "Failure" .-> FAIL
+ BUILD -. "Failure" .-> FAIL
 ```
-
-------------------------------------------------------------------------
-
-# 🔄 Pipeline Stages
-
-  -------------------------------------------------------------------------
-                            \# Stage                 Purpose
-  ---------------------------- --------------------- ----------------------
-                             1 **Checkout SCM**      Retrieves the source
-                                                     code from the
-                                                     configured GitHub
-                                                     branch.
-
-                             2 **Checkout**          Confirms the working
-                                                     source is available in
-                                                     the Jenkins workspace.
-
-                             3 **Verify Java**       Checks that the
-                                                     required Java
-                                                     environment is
-                                                     available.
-
-                             4 **Verify Android      Confirms that the
-                               SDK**                 Android SDK is
-                                                     installed and
-                                                     accessible.
-
-                             5 **Prepare Gradle**    Makes the Gradle
-                                                     wrapper executable so
-                                                     Jenkins can run Gradle
-                                                     commands.
-
-                             6 **Run Unit Tests**    Runs the Android
-                                                     unit-test suite using
-                                                     `testDebugUnitTest`.
-
-                             7 **Run Android Lint**  Performs static
-                                                     analysis using
-                                                     `lintDebug`.
-
-                             8 **Build Android APK** Builds the debug APK
-                                                     using `assembleDebug`.
-
-                             9 **Verify APK**        Checks that the
-                                                     generated APK exists
-                                                     in the expected output
-                                                     directory.
-
-                            10 **Upload APK to S3**  Stores `app-debug.apk`
-                                                     as a build artifact in
-                                                     Amazon S3.
-
-                            11 **Generate APK        Creates a time-limited
-                               Download URL**        S3 presigned URL for
-                                                     downloading the
-                                                     artifact.
-
-                            12 **Cleanup**           Cleans the Jenkins
-                                                     workspace after the
-                                                     pipeline execution.
-  -------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-# 🛡️ Quality Gates
-
-The pipeline is not only a build script. It contains quality gates
-before artifact delivery.
-
-### 🧪 Unit Testing
-
-``` bash
-./gradlew testDebugUnitTest --no-daemon
-```
-
-Validates the application's unit tests.
-
-**If the tests fail → the pipeline stops.**
-
-### 🔎 Android Lint
-
-``` bash
-./gradlew lintDebug --no-daemon
-```
-
-Performs static code analysis and checks for Android code-quality
-issues.
-
-The project also contains:
-
-``` text
-lint.xml
-```
-
-which configures the handling of the `PropertyEscape` lint issue
-encountered with the Windows Android SDK path.
-
-**If lint fails → the pipeline stops.**
-
-### 📦 APK Build
-
-``` bash
-./gradlew assembleDebug --no-daemon
-```
-
-Generates:
-
-``` text
-app/build/outputs/apk/debug/app-debug.apk
-```
-
-------------------------------------------------------------------------
-
-# ☁️ AWS S3 Artifact Delivery
-
-After a successful build, Jenkins uploads the generated APK to an Amazon
-S3 bucket.
-
-``` text
-Android APK
-     │
-     ▼
-Amazon S3
-     │
-     ▼
-Presigned Download URL
-     │
-     ▼
-Temporary APK Download
-```
-
-The download URL is **time-limited** rather than exposing the S3 object
-permanently through a public URL.
-
-### Artifact
-
-``` text
+### Pipeline stages
+| Stage | Responsibility |
+|---|---|
+| **Checkout SCM** | Retrieves the project from GitHub. |
+| **Verify Java** | Confirms the Java build environment. |
+| **Verify Android SDK** | Confirms Android SDK availability. |
+| **Prepare Gradle** | Prepares the Gradle wrapper for Jenkins execution. |
+| **Run Unit Tests** | Executes Android debug unit tests. |
+| **Run Android Lint** | Performs static analysis. |
+| **Build Android APK** | Generates `app-debug.apk`. |
+| **Verify APK** | Confirms that the APK was generated. |
+| **Upload APK to S3** | Stores the build artifact in Amazon S3. |
+| **Generate Presigned URL** | Creates temporary artifact access. |
+| **Cleanup** | Cleans the Jenkins workspace. |
+This keeps application development and infrastructure work connected to a repeatable build-and-delivery process.
+---
+# ☁️ AWS Artifact Delivery
+After a successful Android build:
+```text
 app-debug.apk
+ │
+ ▼
+Jenkins
+ │
+ ▼
+Amazon S3
+ │
+ ▼
+Presigned Download URL
 ```
-
-### Presigned URL
-
-The pipeline generates a temporary download URL with a **1-hour validity
-period**.
-
-> 🔐 The S3 bucket can remain private while the presigned URL provides
-> temporary access to the specific artifact.
-
-------------------------------------------------------------------------
-
+The APK is stored as a build artifact in S3, and the pipeline can generate a temporary presigned download URL.
+This allows the artifact to remain in S3 without requiring the object itself to be permanently public.
+---
 # 🧱 Infrastructure as Code
-
-The AWS infrastructure used by the project is represented under:
-
-``` text
+The infrastructure configuration is maintained under:
+```text
 terraform/
 ```
-
-The Terraform configuration includes the infrastructure required for the
-CI/CD environment, including the Jenkins host and S3-related resources
-used by the project.
-
-Typical Terraform workflow:
-
-``` bash
+Terraform is used to represent the cloud infrastructure required by the CI/CD environment.
+Typical workflow:
+```bash
 terraform init
 terraform plan
 terraform apply
 ```
-
-> ⚠️ Do not commit AWS credentials, private keys, Terraform state files,
-> or other secrets to GitHub.
-
-------------------------------------------------------------------------
-
-# 📁 Project Structure
-
-``` text
+> ⚠️ Never commit AWS access keys, private keys, passwords, Terraform state containing sensitive values, or other secrets to the repository.
+---
+# 📁 Repository Structure
+```text
 EVIDA/
 │
-├── app/                         # Android application source
+├── 📱 app/
+│ └── Android application source
 │
-├── gradle/                      # Gradle wrapper and configuration
+├── ⚙️ gradle/
+│ └── Gradle wrapper/configuration
 │
-├── build.gradle.kts             # Root Gradle build configuration
-├── settings.gradle.kts          # Gradle project settings
-├── gradle.properties            # Gradle properties
+├── 🧱 terraform/
+│ ├── main.tf
+│ ├── provider.tf
+│ └── .terraform.lock.hcl
 │
-├── gradlew                      # Gradle wrapper for Linux/macOS/Jenkins
-├── gradlew.bat                  # Gradle wrapper for Windows
+├── 🔧 Jenkinsfile
+├── 🔎 lint.xml
 │
-├── Jenkinsfile                  # CI/CD pipeline definition
-├── lint.xml                     # Android Lint configuration
+├── build.gradle.kts
+├── settings.gradle.kts
+├── gradle.properties
 │
-├── terraform/                   # Infrastructure as Code
-│   ├── main.tf
-│   ├── provider.tf
-│   └── .terraform.lock.hcl
+├── gradlew
+├── gradlew.bat
 │
-├── .gitignore                   # Git ignore rules
-│
-└── PHASE_1_FORENSIC_REPORT.md   # Project documentation
+├── .gitignore
+├── PHASE_1_FORENSIC_REPORT.md
+└── README.md
 ```
-
-------------------------------------------------------------------------
-
-# ⚙️ Jenkins Environment
-
-The Jenkins server requires the tools used by the pipeline to be
-available on the Jenkins machine.
-
-### Required environment
-
--   ☕ Java / JDK
--   🤖 Android SDK
--   ⚙️ Gradle Wrapper
--   🔧 Jenkins
--   ☁️ AWS CLI
--   🔐 AWS permissions for the required S3 operations
--   🐙 Git
-
-The Android SDK path is configured locally on the Jenkins environment
-rather than being committed as a machine-specific Windows path.
-
-------------------------------------------------------------------------
-
-# 🚦 How the Pipeline Works
-
-### 1️⃣ Developer changes the code
-
-The developer modifies the EVIDA Android application.
-
-### 2️⃣ Code is pushed to GitHub
-
-The source code and `Jenkinsfile` are stored in the GitHub repository.
-
-### 3️⃣ Jenkins checks out the configured branch
-
-Jenkins retrieves the latest source code from the branch configured in
-the Jenkins job.
-
-For the development/CI-CD workflow, this can be the:
-
-``` text
-CICD
-```
-
-branch.
-
-After the work is merged into the production/default branch, Jenkins can
-be configured to build:
-
-``` text
-main
-```
-
-instead.
-
-### 4️⃣ Jenkins validates the environment
-
-The pipeline verifies Java and the Android SDK.
-
-### 5️⃣ Tests and lint run
-
-The application is checked before the APK is produced.
-
-``` text
-Unit Tests
-     ↓
-Android Lint
-     ↓
-Build
-```
-
-### 6️⃣ APK is generated
-
-Gradle creates the debug APK.
-
-### 7️⃣ APK is verified
-
-Jenkins checks that the expected artifact exists.
-
-### 8️⃣ APK is uploaded to S3
-
-The generated artifact is stored in Amazon S3.
-
-### 9️⃣ Temporary download URL is generated
-
-Jenkins generates a presigned URL valid for one hour.
-
-### 🔟 Workspace is cleaned
-
-The Jenkins workspace is cleaned so that the next build starts from a
-clean environment.
-
-------------------------------------------------------------------------
-
-# 🧩 Main Components & Their Roles
-
-  -----------------------------------------------------------------------
-  Component                           Role
-  ----------------------------------- -----------------------------------
-  👩‍💻 **Developer**                    Creates and modifies application
-                                      code.
-
-  🐙 **GitHub**                       Stores source code, branches,
-                                      Jenkinsfile and project
-                                      configuration.
-
-  🔧 **Jenkins**                      Automates the complete CI/CD
-                                      workflow.
-
-  ☕ **Java**                         Provides the runtime required for
-                                      the Android/Gradle build
-                                      environment.
-
-  🤖 **Android SDK**                  Provides Android build tools and
-                                      platform components.
-
-  ⚙️ **Gradle**                       Compiles, tests, lints and packages
-                                      the Android application.
-
-  🧪 **Unit Tests**                   Validate application behaviour
-                                      through automated tests.
-
-  🔎 **Android Lint**                 Performs static analysis and
-                                      detects code-quality issues.
-
-  📦 **APK**                          The generated Android application
-                                      artifact.
-
-  ☁️ **Amazon S3**                    Stores the generated APK artifact.
-
-  🔗 **Presigned URL**                Provides temporary access to the
-                                      private S3 artifact.
-
-  🧱 **Terraform**                    Defines and provisions cloud
-                                      infrastructure as code.
-  -----------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-# 🔐 Security Considerations
-
-The pipeline includes basic quality controls, but it is **not a complete
-enterprise security pipeline**.
-
-Current controls include:
-
--   ✅ Unit testing
--   ✅ Android Lint
--   ✅ Build validation
--   ✅ Private artifact storage with temporary presigned access
--   ✅ Git ignore rules for sensitive/local files
-
-Potential future improvements include:
-
--   🔐 Secret scanning
--   🛡️ Dependency vulnerability scanning
--   🔎 SAST/security analysis
--   📦 Dependency/SBOM analysis
--   🔑 Jenkins Credentials Manager instead of plain-text credentials
--   🐳 Isolated build agents
--   📋 Artifact signing
--   🚪 Protected GitHub branches and pull-request checks
-
-------------------------------------------------------------------------
-
-# ▶️ Running the Project
-
-### Local Android build
-
-On a machine with the required Android SDK and Java environment:
-
-``` bash
+---
+# ▶️ Running the Android Project
+Make sure the required Android development environment is installed.
+### Build the debug APK
+```bash
 ./gradlew assembleDebug
 ```
-
 ### Run unit tests
-
-``` bash
+```bash
 ./gradlew testDebugUnitTest
 ```
-
-### Run lint
-
-``` bash
+### Run Android Lint
+```bash
 ./gradlew lintDebug
 ```
-
 ### Clean the project
-
-``` bash
+```bash
 ./gradlew clean
 ```
-
-------------------------------------------------------------------------
-
-# 📊 CI/CD Success Criteria
-
-A successful pipeline should reach the final stages:
-
-``` text
-✅ Checkout
-   ↓
-✅ Java Verification
-   ↓
-✅ Android SDK Verification
-   ↓
-✅ Gradle Preparation
-   ↓
-✅ Unit Tests
-   ↓
-✅ Android Lint
-   ↓
-✅ APK Build
-   ↓
-✅ APK Verification
-   ↓
-✅ S3 Upload
-   ↓
-✅ Presigned URL
-   ↓
-✅ Cleanup
-   ↓
-🎉 SUCCESS
+The generated debug APK is expected under:
+```text
+app/build/outputs/apk/debug/app-debug.apk
 ```
-
-If a required quality/build stage fails:
-
-``` text
-❌ Test/Lint/Build Failure
-        ↓
-   Pipeline Stops
-        ↓
-   APK is not promoted
+---
+# 🧪 CI/CD Quality Gates
+The pipeline intentionally places automated validation before artifact delivery:
+```text
+ CODE
+ │
+ ▼
+ Unit Tests
+ │
+ PASS │
+ ▼
+ Android
+ Lint
+ │
+ PASS │
+ ▼
+ APK Build
+ │
+ PASS │
+ ▼
+ APK Verify
+ │
+ PASS │
+ ▼
+ S3 Upload
 ```
-
-------------------------------------------------------------------------
-
-# 🎯 Project Outcome
-
-The EVIDA project demonstrates a complete, automated Android CI/CD
-workflow in which source code moves from **GitHub → Jenkins → automated
-validation → APK build → Amazon S3 artifact storage → temporary download
-access**.
-
-It also demonstrates the use of **Terraform for infrastructure
-provisioning** and establishes a foundation that can be extended with
-stronger security, automated triggers, release management, and
-production-grade deployment controls.
-
-
-```{=html}
-<p align="center">
+A failure in a required quality/build stage prevents the later artifact-delivery stages from continuing.
+---
+# 📸 Application Screens
+The project documentation demonstrates the application through screenshots of:
+1. **Welcome Page**
+2. **System Readiness / Permissions**
+3. **PIN Setup**
+4. **EVIDA Core Home Screen**
+5. **Evidence List**
+6. **Decrypted Evidence with Report**
+These screenshots demonstrate the progression from secure initialization to evidence management and report generation.
+> **Recommended GitHub enhancement:** place the actual application screenshots inside a repository folder such as `docs/screenshots/` and reference them here using relative Markdown image paths.
+Example:
+```markdown
+![EVIDA Home Screen](docs/screenshots/home-screen.png)
 ```
-`<strong>`{=html}🚀 EVIDA --- Build it. Test it. Ship
-it.`</strong>`{=html}
-```{=html}
-</p>
+---
+# 🌟 Key Features
+### 🔐 Forensic Security
+- Hardware-backed key protection
+- AES-256 GCM evidence encryption
+- RSA-2048 OAEP key wrapping
+- ECDSA P-256 digital signatures
+- SHA-256 evidence integrity hashing
+### 📍 Evidence Context
+- GPS coordinates
+- NTP-based timestamping
+- Device identity
+- Source/application verification
+- Environmental forensic metadata
+### 📱 Evidence Management
+- Secure evidence capture
+- Evidence list
+- Protected local metadata
+- Authentication-controlled access
+- Evidence decryption and verification
+### 📄 Forensic Export
+- Encrypted evidence
+- Signed PDF report
+- Forensic bundle generation
+- Evidence handoff for authority/forensic workflows
+The project also describes a **Forensic Integrity Score (0–100)** intended to automatically assess evidence trustworthiness at capture time.
+---
+# 🎓 Project Outcome
+EVIDA demonstrates an end-to-end approach to **forensic evidence capture, protection, verification, management, and export** on Android.
+The project combines:
+```text
+📱 Android
+ +
+🔐 Applied Cryptography
+ +
+🛡️ Hardware-backed Security
+ +
+📍 Forensic Metadata
+ +
+⛓️ Chain of Custody
+ +
+📄 Forensic Reporting
+ +
+🔧 CI/CD
+ +
+☁️ Cloud Artifact Storage
+ +
+🧱 Infrastructure as Code
 ```
+The documented project outcome highlights hardware-backed encryption, tamper-evident metadata, cryptographic chain of custody, biometric access, GPS evidence context, forensic export, advanced metadata, and professional PDF reports.
+---
+### 🛡️ EVIDA
+Secure the evidence. Preserve its integrity. Protect the truth.
