@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        ANDROID_HOME = '/opt/android-sdk'
+        ANDROID_SDK_ROOT = '/opt/android-sdk'
+        PATH = "/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin:${env.PATH}"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -15,10 +21,18 @@ pipeline {
             }
         }
 
+        stage('Verify Android SDK') {
+            steps {
+                sh 'echo "ANDROID_HOME=$ANDROID_HOME"'
+                sh 'echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"'
+                sh 'ls -la $ANDROID_HOME/platforms'
+            }
+        }
+
         stage('Build Android APK') {
             steps {
                 sh 'chmod +x gradlew'
-                sh './gradlew assembleDebug'
+                sh './gradlew assembleDebug --no-daemon'
             }
         }
 
