@@ -29,6 +29,12 @@ pipeline {
             }
         }
 
+        stage('Run Unit Tests') {
+            steps {
+                sh './gradlew testDebugUnitTest --no--daemon'
+            }
+        }
+
         stage('Build Android APK') {
             steps {
                 sh 'chmod +x gradlew'
