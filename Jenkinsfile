@@ -35,6 +35,13 @@ pipeline {
             }
         }
 
+         stage('Run Android Lint') {
+            steps {
+                sh './gradlew lintDebug --no--daemon'
+            }
+        }
+
+        
         stage('Build Android APK') {
             steps {
                 sh 'chmod +x gradlew'
