@@ -51,5 +51,20 @@ pipeline {
                 '''
             }
         }
+
+        stage('Generate APK Download URL') {
+            steps {
+                sh '''
+                    URL=$(aws s3 presign \
+                        s3://evida-cicd-artifacts-2026/app-debug.apk \
+                        --expires-in 3600)
+
+                    echo "=========================================="
+                    echo "APK DOWNLOAD URL (valid for 1 hour):"
+                    echo "$URL"
+                    echo "=========================================="
+                '''
+            }
+        }
     }
 }
