@@ -1,16 +1,16 @@
-# 🛡️ EVIDA — Forensic Evidence Capture Application
+# EVIDA — Forensic Evidence Capture Application
 
 ## Capture. Protect. Verify. Preserve.
 
-EVIDA is a forensic-grade Android application designed to capture, protect, verify, manage, and export digital evidence while maintaining cryptographic integrity and forensic metadata.
+EVIDA is a forensic-grade Android application built to capture, protect, verify, manage, and export digital evidence while preserving its cryptographic integrity and forensic metadata.
 
 ---
 
-## 📖 About EVIDA
+## About EVIDA
 
 **EVIDA (Evidence Capture Application)** addresses a fundamental problem with conventional screenshots: digital evidence can be modified or fabricated after capture, making its integrity and provenance difficult to establish.
 
-EVIDA converts screenshot capture into a controlled forensic evidence workflow.
+EVIDA turns a simple screenshot into a controlled forensic evidence workflow.
 
 At the time of capture, the application associates the evidence with forensic information such as:
 
@@ -20,60 +20,57 @@ At the time of capture, the application associates the evidence with forensic in
 - Source/application information
 - Cryptographic integrity information
 
-The captured evidence is then protected through multiple cryptographic layers and can be exported as a forensic bundle containing encrypted evidence and a signed PDF report.
+The captured evidence is protected through multiple cryptographic layers and can then be exported as a forensic bundle containing the encrypted evidence and a signed PDF report.
 
 ---
-
-# 🎯 The Problem
+# The Problem
 
 Digital evidence such as screenshots and screen recordings can be easily modified after capture.
 
 Traditional screenshot tools generally do not provide:
 
-- ❌ Cryptographic integrity verification
-- ❌ Provenance information
-- ❌ Hardware-backed key protection
-- ❌ A forensic chain of custody
-- ❌ Trusted timestamps
-- ❌ Evidence-oriented export packages
+- Cryptographic integrity verification
+- Provenance information
+- Hardware-backed key protection
+- A forensic chain of custody
+- Trusted timestamps
+- Evidence-oriented export packages
 
 EVIDA addresses these gaps by combining evidence capture with cryptographic protection, forensic metadata, hardware-backed security, and controlled evidence export.
 
 ---
+# What EVIDA Actually Does
 
-# 💡 What EVIDA Actually Does
+EVIDA takes a conventional screenshot and turns it into a structured digital-evidence workflow.
 
-EVIDA transforms a conventional screenshot into a structured digital-evidence workflow.
-
-## 🔎 Evidence Processing Workflow
+## Evidence Processing Workflow
 
 ```mermaid
 flowchart TD
-    A["👤 User<br/>Captures Digital Evidence"]
-    B["📸 Screenshot Capture<br/>Evidence Acquired"]
-    C["#️⃣ SHA-256 Hash<br/>Integrity Fingerprint"]
-    D["📋 Forensic Metadata<br/>GPS • NTP Time • Device Identity<br/>Source / Application Information"]
-    E["🔐 AES-256 GCM<br/>Evidence Encryption"]
-    F["🔑 RSA-2048 OAEP<br/>Key Wrapping"]
-    G["✍️ ECDSA P-256<br/>Digital Signature"]
-    H["📦 Forensic Bundle<br/>Encrypted Evidence + Metadata"]
-    I["📄 Signed PDF Report"]
+ A[" User<br/>Captures Digital Evidence"]
+ B[" Screenshot Capture<br/>Evidence Acquired"]
+ C["#⃣ SHA-256 Hash<br/>Integrity Fingerprint"]
+ D[" Forensic Metadata<br/>GPS • NTP Time • Device Identity<br/>Source / Application Information"]
+ E[" AES-256 GCM<br/>Evidence Encryption"]
+ F[" RSA-2048 OAEP<br/>Key Wrapping"]
+ G[" ECDSA P-256<br/>Digital Signature"]
+ H[" Forensic Bundle<br/>Encrypted Evidence + Metadata"]
+ I[" Signed PDF Report"]
 
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> H
-    G --> I
+ A --> B
+ B --> C
+ C --> D
+ D --> E
+ E --> F
+ F --> G
+ G --> H
+ G --> I
 ```
 
 ---
+# Security Model
 
-# 🔐 Security Model
-
-EVIDA uses multiple security layers to protect evidence.
+EVIDA uses several security layers to protect captured evidence.
 
 | Security Layer | Technology | Purpose |
 |---|---|---|
@@ -88,36 +85,34 @@ EVIDA uses multiple security layers to protect evidence.
 | Local Metadata | **Room** | Stores application and evidence metadata |
 
 ---
+# Forensic Chain of Custody
 
-# ⛓️ Forensic Chain of Custody
-
-EVIDA maintains a traceable relationship between the original capture and the exported evidence.
+EVIDA keeps a traceable link between the original capture and the exported evidence.
 
 ```mermaid
 flowchart TD
-    A["📱 Evidence Captured"]
-    B["#️⃣ SHA-256 Hash"]
-    C["📋 Forensic Metadata"]
-    D["🔐 AES-256 GCM Encryption"]
-    E["🔑 RSA-2048 Key Wrapping"]
-    F["✍️ ECDSA Signature"]
-    G["🛡️ Hardware-backed KeyStore"]
-    H["📦 Forensic Bundle"]
-    I["⚖️ Forensic / Legal Review"]
+ A[" Evidence Captured"]
+ B["#⃣ SHA-256 Hash"]
+ C[" Forensic Metadata"]
+ D[" AES-256 GCM Encryption"]
+ E[" RSA-2048 Key Wrapping"]
+ F[" ECDSA Signature"]
+ G[" Hardware-backed KeyStore"]
+ H[" Forensic Bundle"]
+ I[" Forensic / Legal Review"]
 
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> H
-    H --> I
+ A --> B
+ B --> C
+ C --> D
+ D --> E
+ E --> F
+ F --> G
+ G --> H
+ H --> I
 ```
 
 ---
-
-# 🔄 Encryption & Decryption
+# Encryption & Decryption
 
 ## Encryption
 
@@ -127,9 +122,9 @@ The screenshot is captured and hashed using **SHA-256**.
 
 ```text
 Screenshot
-    ↓
+ ↓
 SHA-256
-    ↓
+ ↓
 Integrity Anchor
 ```
 
@@ -139,8 +134,8 @@ An ephemeral **AES-256 GCM** session key encrypts the screenshot.
 
 ```text
 Screenshot + AES-256 Session Key
-              ↓
-      Encrypted Evidence
+ ↓
+ Encrypted Evidence
 ```
 
 ### 3. Key Wrapping
@@ -149,9 +144,9 @@ The AES session key is protected using the forensic authority's **RSA-2048 publi
 
 ```text
 AES Session Key
-      ↓
+ ↓
 RSA-2048 OAEP
-      ↓
+ ↓
 Wrapped AES Key
 ```
 
@@ -161,41 +156,40 @@ Android KeyStore-backed security is used to sign metadata and SHA-256 integrity 
 
 ---
 
-## 🔓 Decryption
+## Decryption
 
-The documented decryption workflow is:
+The decryption workflow is:
 
 ```text
 Biometric / PIN Authentication
-            ↓
+ ↓
 Unlock Hardware KeyStore
-            ↓
+ ↓
 Fetch Wrapped AES Key
-            ↓
+ ↓
 Unwrap AES Session Key
-            ↓
+ ↓
 Recalculate Evidence Hash
-            ↓
+ ↓
 Verify Integrity
-            ↓
+ ↓
 AES-256 GCM Decryption
-            ↓
+ ↓
 View Decrypted Evidence
 ```
 
 The evidence integrity is verified before the protected evidence is decrypted for viewing.
 
 ---
+# Application Workflow
 
-# 📱 Application Workflow
+EVIDA provides a complete workflow for capturing, protecting, reviewing, and exporting evidence.
 
-EVIDA provides a complete user-facing forensic workflow.
+### 1⃣ Welcome / Initialization
 
-### 1️⃣ Welcome / Initialization
+The application starts in the secure EVIDA forensic environment.
 
-The application starts with the EVIDA secure forensic environment.
-
-### 2️⃣ System Readiness
+### 2⃣ System Readiness
 
 The application verifies required components such as:
 
@@ -204,19 +198,19 @@ The application verifies required components such as:
 - Usage telemetry
 - Screen capture
 
-### 3️⃣ Secure PIN Setup
+### 3⃣ Secure PIN Setup
 
 The user creates a six-digit PIN to protect the forensic environment.
 
-### 4️⃣ Forensic Dashboard
+### 4⃣ Forensic Dashboard
 
-The dashboard provides security and application status information.
+The dashboard shows security and application status information.
 
-### 5️⃣ Evidence Capture
+### 5⃣ Evidence Capture
 
 The user captures digital evidence from the device.
 
-### 6️⃣ Evidence Protection
+### 6⃣ Evidence Protection
 
 The captured evidence is:
 
@@ -225,111 +219,108 @@ The captured evidence is:
 - Signed
 - Associated with forensic metadata
 
-### 7️⃣ Evidence List
+### 7⃣ Evidence List
 
-Captured evidence can be viewed and managed from the evidence section.
+Captured evidence can be viewed and managed from the evidence section of the application.
 
-### 8️⃣ Decryption & Verification
+### 8⃣ Decryption & Verification
 
-Authorized users can access the protected evidence after authentication and integrity verification.
+Authorized users can access protected evidence after authentication and successful integrity verification.
 
-### 9️⃣ Forensic Report
+### 9⃣ Forensic Report
 
 Evidence can be exported with a signed PDF report for forensic and legal documentation.
 
 ---
+# Forensic Bundle
 
-# 📦 Forensic Bundle
-
-EVIDA produces a forensic export package containing encrypted evidence and its associated report.
+EVIDA produces a forensic export package that contains the encrypted evidence and its associated report.
 
 ```text
 Forensic Bundle
 │
-├── 🔐 Encrypted Evidence
+├── Encrypted Evidence
 │
-└── 📄 Signed PDF Report
-    │
-    ├── Evidence Metadata
-    ├── Integrity Information
-    └── Verification Information
+└── Signed PDF Report
+ │
+ ├── Evidence Metadata
+ ├── Integrity Information
+ └── Verification Information
 ```
 
 The overall evidence handoff workflow is:
 
 ```text
 User Capture
-     ↓
+ ↓
 Encrypt + Sign
-     ↓
+ ↓
 Forensic Bundle
-     ↓
+ ↓
 Forensic Authority / Police Lab
-     ↓
+ ↓
 Decryption + Analysis
-     ↓
+ ↓
 Legal Documentation
 ```
 
 ---
-
-# 🏗️ Technical Architecture
+# Technical Architecture
 
 ```mermaid
 flowchart TD
-    U["👤 User"]
-    APP["📱 Android Application<br/>Kotlin + Jetpack Compose"]
-    CAP["📸 Evidence Capture"]
-    META["📋 Forensic Metadata"]
-    GPS["📍 GPS"]
-    NTP["🕐 NTP Timestamp"]
-    DEV["📱 Device Identity"]
-    SRC["🔎 Source Verification"]
-    HASH["#️⃣ SHA-256"]
-    ENC["🔐 AES-256 GCM"]
-    WRAP["🔑 RSA-2048 OAEP"]
-    SIGN["✍️ ECDSA P-256"]
-    AUTH["🔐 PIN / Biometric"]
-    KS["🛡️ Android KeyStore<br/>TEE / StrongBox"]
-    DB["🗄️ Room Database"]
-    BUNDLE["📦 Forensic Bundle"]
-    PDF["📄 Signed PDF Report"]
+ U[" User"]
+ APP[" Android Application<br/>Kotlin + Jetpack Compose"]
+ CAP[" Evidence Capture"]
+ META[" Forensic Metadata"]
+ GPS[" GPS"]
+ NTP[" NTP Timestamp"]
+ DEV[" Device Identity"]
+ SRC[" Source Verification"]
+ HASH["#⃣ SHA-256"]
+ ENC[" AES-256 GCM"]
+ WRAP[" RSA-2048 OAEP"]
+ SIGN[" ECDSA P-256"]
+ AUTH[" PIN / Biometric"]
+ KS[" Android KeyStore<br/>TEE / StrongBox"]
+ DB[" Room Database"]
+ BUNDLE[" Forensic Bundle"]
+ PDF[" Signed PDF Report"]
 
-    U --> APP
-    APP --> CAP
-    APP --> AUTH
+ U --> APP
+ APP --> CAP
+ APP --> AUTH
 
-    CAP --> META
-    META --> GPS
-    META --> NTP
-    META --> DEV
-    META --> SRC
+ CAP --> META
+ META --> GPS
+ META --> NTP
+ META --> DEV
+ META --> SRC
 
-    CAP --> HASH
-    CAP --> ENC
+ CAP --> HASH
+ CAP --> ENC
 
-    ENC --> WRAP
-    HASH --> SIGN
-    META --> SIGN
+ ENC --> WRAP
+ HASH --> SIGN
+ META --> SIGN
 
-    AUTH --> KS
-    SIGN --> KS
-    WRAP --> KS
+ AUTH --> KS
+ SIGN --> KS
+ WRAP --> KS
 
-    META --> DB
+ META --> DB
 
-    ENC --> BUNDLE
-    SIGN --> BUNDLE
-    DB --> BUNDLE
+ ENC --> BUNDLE
+ SIGN --> BUNDLE
+ DB --> BUNDLE
 
-    BUNDLE --> PDF
+ BUNDLE --> PDF
 ```
 
 ---
+# Technology Stack
 
-# 🧰 Technology Stack
-
-## 📱 Android
+## Android
 
 - Kotlin
 - Jetpack Compose
@@ -340,14 +331,14 @@ flowchart TD
 - Kotlin Coroutines
 - Kotlin Flow
 
-## 🔐 Cryptography
+## Cryptography
 
 - AES-256 GCM
 - RSA-2048 OAEP
 - ECDSA P-256
 - SHA-256
 
-## ☁️ Infrastructure & DevOps
+## Infrastructure & DevOps
 
 - GitHub
 - Jenkins
@@ -359,50 +350,49 @@ flowchart TD
 The project specifies Android API 24 as the minimum SDK and API 36 as the target SDK.
 
 ---
-
-# 🚀 CI/CD Pipeline
+# CI/CD Pipeline
 
 EVIDA uses Jenkins to automatically validate the Android application, build the APK, verify the generated artifact, and upload it to Amazon S3.
 
-## 🔄 CI/CD Architecture
+## CI/CD Architecture
 
 The pipeline follows a **vertical quality-gated workflow**:
 
 ```mermaid
 flowchart TD
-    A["🐙 GitHub<br/>Source Code"]
-    B["🔧 Jenkins<br/>Pipeline Trigger"]
-    C["📥 Checkout SCM"]
-    D["☕ Verify Java"]
-    E["🤖 Verify Android SDK"]
-    F["⚙️ Prepare Gradle"]
-    G["🧪 Run Unit Tests"]
-    H["🔎 Run Android Lint"]
-    I["📦 Build Android APK"]
-    J["✅ Verify APK"]
-    K["☁️ Upload APK to Amazon S3"]
-    L["🔗 Generate Presigned URL"]
-    M["🧹 Cleanup"]
-    N["🎉 Pipeline Complete"]
+ A[" GitHub<br/>Source Code"]
+ B[" Jenkins<br/>Pipeline Trigger"]
+ C[" Checkout SCM"]
+ D[" Verify Java"]
+ E[" Verify Android SDK"]
+ F[" Prepare Gradle"]
+ G[" Run Unit Tests"]
+ H[" Run Android Lint"]
+ I[" Build Android APK"]
+ J[" Verify APK"]
+ K[" Upload APK to Amazon S3"]
+ L[" Generate Presigned URL"]
+ M[" Cleanup"]
+ N[" Pipeline Complete"]
 
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> H
-    H --> I
-    I --> J
-    J --> K
-    K --> L
-    L --> M
-    M --> N
+ A --> B
+ B --> C
+ C --> D
+ D --> E
+ E --> F
+ F --> G
+ G --> H
+ H --> I
+ I --> J
+ J --> K
+ K --> L
+ L --> M
+ M --> N
 
-    G -. "FAIL" .-> X["🛑 Pipeline Stopped"]
-    H -. "FAIL" .-> X
-    I -. "FAIL" .-> X
-    J -. "FAIL" .-> X
+ G -. "FAIL" .-> X[" Pipeline Stopped"]
+ H -. "FAIL" .-> X
+ I -. "FAIL" .-> X
+ J -. "FAIL" .-> X
 ```
 
 ## Pipeline Stages
@@ -423,51 +413,49 @@ flowchart TD
 
 ### Quality Gate
 
-The pipeline is intentionally sequential.
+The pipeline is intentionally kept sequential.
 
 ```text
 Unit Tests
-    ↓
+ ↓
 Android Lint
-    ↓
+ ↓
 APK Build
-    ↓
+ ↓
 APK Verification
-    ↓
+ ↓
 S3 Upload
 ```
 
 If a required validation or build stage fails, the later artifact-delivery stages do not execute.
 
 ---
-
-# ☁️ AWS Artifact Delivery
+# AWS Artifact Delivery
 
 After the Jenkins pipeline successfully builds and verifies the APK:
 
 ```text
 app-debug.apk
-      ↓
-   Jenkins
-      ↓
+ ↓
+ Jenkins
+ ↓
  Amazon S3
-      ↓
+ ↓
 Presigned URL
 ```
 
 The APK remains stored in Amazon S3 while the presigned URL provides temporary access to the artifact.
 
 ---
+# Infrastructure as Code
 
-# 🧱 Infrastructure as Code
-
-The cloud infrastructure configuration is maintained under:
+The cloud infrastructure configuration is maintained in:
 
 ```text
 terraform/
 ```
 
-Terraform is used to define and manage the infrastructure required by the CI/CD environment.
+Terraform defines and manages the infrastructure required for the CI/CD environment.
 
 Typical workflow:
 
@@ -477,28 +465,27 @@ terraform plan
 terraform apply
 ```
 
-> ⚠️ **Security:** Never commit AWS access keys, private keys, passwords, Terraform state containing sensitive values, or other secrets to the repository.
+> **Security:** Never commit AWS access keys, private keys, passwords, Terraform state containing sensitive values, or other secrets to the repository.
 
 ---
-
-# 📁 Repository Structure
+# Repository Structure
 
 ```text
 EVIDA/
 │
-├── 📱 app/
-│   └── Android application source
+├── app/
+│ └── Android application source
 │
-├── ⚙️ gradle/
-│   └── Gradle configuration
+├── gradle/
+│ └── Gradle configuration
 │
-├── 🧱 terraform/
-│   ├── main.tf
-│   ├── provider.tf
-│   └── .terraform.lock.hcl
+├── terraform/
+│ ├── main.tf
+│ ├── provider.tf
+│ └── .terraform.lock.hcl
 │
-├── 🔧 Jenkinsfile
-├── 🔎 lint.xml
+├── Jenkinsfile
+├── lint.xml
 │
 ├── build.gradle.kts
 ├── settings.gradle.kts
@@ -513,10 +500,9 @@ EVIDA/
 ```
 
 ---
+# ▶ Running the Android Project
 
-# ▶️ Running the Android Project
-
-Make sure the required Android development environment is installed.
+Before running the project, make sure the required Android development environment is installed.
 
 ## Build the Debug APK
 
@@ -542,17 +528,16 @@ Make sure the required Android development environment is installed.
 ./gradlew clean
 ```
 
-The generated debug APK is expected at:
+The generated debug APK will be available at:
 
 ```text
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ---
+# Key Features
 
-# 🌟 Key Features
-
-### 🔐 Forensic Security
+### Forensic Security
 
 - Hardware-backed key protection
 - AES-256 GCM evidence encryption
@@ -560,7 +545,7 @@ app/build/outputs/apk/debug/app-debug.apk
 - ECDSA P-256 digital signatures
 - SHA-256 evidence integrity hashing
 
-### 📍 Evidence Context
+### Evidence Context
 
 - GPS coordinates
 - NTP-based timestamping
@@ -568,7 +553,7 @@ app/build/outputs/apk/debug/app-debug.apk
 - Source/application verification
 - Forensic metadata
 
-### 📱 Evidence Management
+### Evidence Management
 
 - Secure evidence capture
 - Evidence list
@@ -576,7 +561,7 @@ app/build/outputs/apk/debug/app-debug.apk
 - Authentication-controlled access
 - Evidence decryption and verification
 
-### 📄 Forensic Export
+### Forensic Export
 
 - Encrypted evidence
 - Signed PDF report
@@ -585,6 +570,6 @@ app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 🛡️ EVIDA
+## EVIDA
 
 **Secure the evidence. Preserve its integrity. Protect the truth.**
